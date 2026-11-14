@@ -2,6 +2,31 @@ namespace SpriteKind {
     export const fly = SpriteKind.create()
     export const doubleJump = SpriteKind.create()
 }
+function spawnPowerups () {
+    for (let value of tiles.getTilesByType(assets.tile`myTile1`)) {
+        apple = sprites.create(img`
+            . . . . . . . e c 7 . . . . . . 
+            . . . . e e e c 7 7 e e . . . . 
+            . . c e e e e c 7 e 2 2 e e . . 
+            . c e e e e e c 6 e e 2 2 2 e . 
+            . c e e e 2 e c c 2 4 5 4 2 e . 
+            c e e e 2 2 2 2 2 2 4 5 5 2 2 e 
+            c e e 2 2 2 2 2 2 2 2 4 4 2 2 e 
+            c e e 2 2 2 2 2 2 2 2 2 2 2 2 e 
+            c e e 2 2 2 2 2 2 2 2 2 2 2 2 e 
+            c e e 2 2 2 2 2 2 2 2 2 2 2 2 e 
+            c e e 2 2 2 2 2 2 2 2 2 2 4 2 e 
+            . e e e 2 2 2 2 2 2 2 2 2 4 e . 
+            . 2 e e 2 2 2 2 2 2 2 2 4 2 e . 
+            . . 2 e e 2 2 2 2 2 4 4 2 e . . 
+            . . . 2 2 e e 4 4 4 2 e e . . . 
+            . . . . . 2 2 e e e e . . . . . 
+            `, SpriteKind.Food)
+        tiles.placeOnTile(apple, value)
+        apple.setScale(0.5, ScaleAnchor.Middle)
+        tiles.setTileAt(value, assets.tile`transparency16`)
+    }
+}
 controller.B.onEvent(ControllerButtonEvent.Pressed, function () {
     if (isFacingRight) {
         projectile = sprites.createProjectileFromSprite(img`
@@ -71,6 +96,39 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.doubleJump, function (sprite, ot
     doubleJumpOn = false
     jumpsRemaining = 0
 })
+function spawnEnemies () {
+    for (let value of tiles.getTilesByType(assets.tile`myTile0`)) {
+        mySprite2 = sprites.create(img`
+            ........................
+            ........................
+            ........................
+            ........................
+            ..........ffff..........
+            ........ff1111ff........
+            .......fb111111bf.......
+            .......f11111111f.......
+            ......fd111111111f......
+            ......fd11111111df......
+            ......fd11111111df......
+            ......fcdd1111ddcff.....
+            .......fbcf11fcbfbbf....
+            .......ffbdb1bdffff.....
+            ........fcbfbfdf........
+            ........ffffffff........
+            ......ffffffffff........
+            .....fcb1bcffff.........
+            ......ffbff.............
+            ........................
+            ........................
+            ........................
+            ........................
+            ........................
+            `, SpriteKind.Enemy)
+        tiles.placeOnTile(mySprite2, value)
+        mySprite2.vx = 50
+        tiles.setTileAt(value, assets.tile`transparency16`)
+    }
+}
 info.onLifeZero(function () {
     game.gameOver(false)
 })
@@ -88,7 +146,8 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Food, function (sprite, otherSpr
     controller.moveSprite(mySprite, 100, 0)
 })
 sprites.onOverlap(SpriteKind.Projectile, SpriteKind.Enemy, function (sprite, otherSprite) {
-    sprites.destroy(sprite, effects.fountain, 100)
+    sprites.destroy(otherSprite, effects.fountain, 100)
+    sprites.destroy(sprite, effects.trail, 100)
 })
 sprites.onOverlap(SpriteKind.Player, SpriteKind.Enemy, function (sprite, otherSprite) {
     if (game.runtime() > invincibleUntil) {
@@ -97,8 +156,10 @@ sprites.onOverlap(SpriteKind.Player, SpriteKind.Enemy, function (sprite, otherSp
         scene.cameraShake(4, 500)
     }
 })
+let mySprite2: Sprite = null
 let projectile: Sprite = null
 let isFacingRight = false
+let apple: Sprite = null
 let jumpsRemaining = 0
 let doubleJumpOn = false
 let invincibleUntil = 0
@@ -131,26 +192,6 @@ controller.moveSprite(mySprite, 75, 0)
 doubleJumpOn = false
 jumpsRemaining = 0
 mySprite.ay = 1000
-let apple = sprites.create(img`
-    . . . . . . . e c 7 . . . . . . 
-    . . . . e e e c 7 7 e e . . . . 
-    . . c e e e e c 7 e 2 2 e e . . 
-    . c e e e e e c 6 e e 2 2 2 e . 
-    . c e e e 2 e c c 2 4 5 4 2 e . 
-    c e e e 2 2 2 2 2 2 4 5 5 2 2 e 
-    c e e 2 2 2 2 2 2 2 2 4 4 2 2 e 
-    c e e 2 2 2 2 2 2 2 2 2 2 2 2 e 
-    c e e 2 2 2 2 2 2 2 2 2 2 2 2 e 
-    c e e 2 2 2 2 2 2 2 2 2 2 2 2 e 
-    c e e 2 2 2 2 2 2 2 2 2 2 4 2 e 
-    . e e e 2 2 2 2 2 2 2 2 2 4 e . 
-    . 2 e e 2 2 2 2 2 2 2 2 4 2 e . 
-    . . 2 e e 2 2 2 2 2 4 4 2 e . . 
-    . . . 2 2 e e 4 4 4 2 e e . . . 
-    . . . . . 2 2 e e e e . . . . . 
-    `, SpriteKind.Food)
-tiles.placeOnTile(apple, tiles.getTileLocation(5, 12))
-apple.setScale(0.5, ScaleAnchor.Middle)
 let cherry = sprites.create(img`
     . . . . . . . . . . . 6 6 6 6 6 
     . . . . . . . . . 6 6 7 7 7 7 8 
@@ -171,34 +212,8 @@ let cherry = sprites.create(img`
     `, SpriteKind.doubleJump)
 tiles.placeOnTile(cherry, tiles.getTileLocation(7, 12))
 cherry.setScale(0.5, ScaleAnchor.Middle)
-let mySprite2 = sprites.create(img`
-    ........................
-    ........................
-    ........................
-    ........................
-    ..........ffff..........
-    ........ff1111ff........
-    .......fb111111bf.......
-    .......f11111111f.......
-    ......fd111111111f......
-    ......fd11111111df......
-    ......fd11111111df......
-    ......fcdd1111ddcff.....
-    .......fbcf11fcbfbbf....
-    .......ffbdb1bdffff.....
-    ........fcbfbfdf........
-    ........ffffffff........
-    ......ffffffffff........
-    .....fcb1bcffff.........
-    ......ffbff.............
-    ........................
-    ........................
-    ........................
-    ........................
-    ........................
-    `, SpriteKind.Enemy)
-tiles.placeOnTile(mySprite2, tiles.getTileLocation(8, 12))
-mySprite2.vx = 50
+spawnEnemies()
+spawnPowerups()
 game.onUpdate(function () {
     if (mySprite.vx > 0) {
         mySprite.setImage(assets.image`myImage`)
@@ -210,10 +225,12 @@ game.onUpdate(function () {
     }
 })
 game.onUpdate(function () {
-    if (mySprite2.isHittingTile(CollisionDirection.Left)) {
-        mySprite2.vx = 50
-    }
-    if (mySprite2.isHittingTile(CollisionDirection.Right)) {
-        mySprite2.vx = -50
+    for (let value of sprites.allOfKind(SpriteKind.Enemy)) {
+        if (value.isHittingTile(CollisionDirection.Left)) {
+            value.vx = 50
+        }
+        if (value.isHittingTile(CollisionDirection.Right)) {
+            value.vx = -50
+        }
     }
 })
